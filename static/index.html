@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>POI Visits — Interactive Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div id="intro-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="modal-content">
+    <button class="modal-close" id="intro-close" aria-label="Закрыть">&times;</button>
+
+    <h2 id="intro-title">Добро пожаловать на портал</h2>
+    <p>
+      На этом портале вы можете просматривать и анализировать точки интереса (POI) на карте,
+      а также выполнять операции с ними. Документация по API:
+      <a href="http://95.165.144.118:8010/docs" target="_blank" rel="noopener noreferrer">FastAPI</a>.
+    </p>
+
+    <div class="slider" id="intro-slider">
+      <div class="slides">
+        <div class="slide active">
+          <div class="slide-image"><img src="/static/images/timeplot.png" alt="Формирование временного ряда">
+          </div>
+          <div class="slide-content">
+            <h3>Формирование временного ряда</h3>
+            <p>Описание первого слайда...</p>
+          </div>
+        </div>
+        <div class="slide">
+          Загружайте и просматривайте сырые POI и их варианты визуализации.
+        </div>
+        <div class="slide">
+          Интегрируйте свой бэкенд на FastAPI для выдачи данных и метаданных.
+        </div>
+      </div>
+      <button class="nav prev" id="slider-prev" aria-label="Предыдущий">&#10094;</button>
+      <button class="nav next" id="slider-next" aria-label="Следующий">&#10095;</button>
+      <div class="dots" id="slider-dots"></div>
+    </div>
+
+    <label class="dont-show">
+      <input type="checkbox" id="intro-dont-show"> Больше не показывать
+    </label>
+  </div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <h2>Модель посещаемости общественных пространств</h2>
+    <h5>- исторические данные;</h5>
+    <h5>- гравитационная модель;</h5>
+    <h5>- байесовская сеть;</h5>
+    <h5>- симуляция Монте-Карло;</h5>
+    <h5>- A/B тест новых данных</h5>
+    <h3>Настройки</h3>
+
+    <div class="block">
+      <h3>1) Загрузка данных:</h3>
+      <h6>    - границы рассмотрения(полигон) .gpkg</h6>
+      <input type="file" id="gpkgFile" accept=".gpkg"/>
+      <button id="btnUpload">Загрузить</button>
+      <div class="hint">После загрузки на карте серым отобразятся исходные POI.</div>
+      <div id="uploadStatus" class="status"></div>
+    </div>
+
+    <div class="block">
+      <h3>2) Параметры модели</h3>
+      <div class="grid2">
+        <label>alpha <input id="alpha" type="number" step="0.01" value="1.0"></label>
+        <label>beta <input id="beta" type="number" step="0.01" value="1.2"></label>
+        <label>gamma <input id="gamma" type="number" step="0.01" value="1.0"></label>
+        <label>d0 <input id="d0" type="number" step="1" value="50"></label>
+      </div>
+      <label>отрезки дистанций
+        <textarea id="distBins" rows="1">[0, 500, 1500, 3000, 5000]</textarea>
+      </label>
+      <label>вес точки
+        <textarea id="typeWeights" rows="2">{"mall": 1.5, "park": 0.8, "cafe": 1.1}</textarea>
+      </label>
+      <label>максимальное расстояние
+        <input id="precomputeMaxDist" type="number" step="100" value="800">
+      </label>
+    </div>
+
+    <div class="block">
+      <h3>3) Временная модель</h3>
+      <div class="grid2">
+        <label>начало <input id="start" type="date" value="2025-01-01"></label>
+        <label>окончание <input id="end" type="date" value="2025-12-31"></label>
+        <label>частота <input id="freq" type="text" value="H"></label>
+        <label>человек в час <input id="baseRate" type="number" step="0.001" value="0.02"></label>
+      </div>
+      <label>коэф. времени дня
+        <textarea id="todMultipliers" rows="2">{"morning": 0.9, "afternoon": 1.1, "evening": 1.0}</textarea>
+      </label>
+      <label>коэф. погоды
+        <textarea id="weatherMultipliers" rows="2">{"sunny": 1.2, "rainy": 0.3, "windy": 0.8, "snowy": 0.8}</textarea>
+      </label>
+      <label>коэф. сезона
+        <textarea id="seasonMultipliers" rows="2">{"spring": 1.0, "summer": 1.5, "autumn": 0.7, "winter": 0.5}</textarea>
+      </label>
+      <label>расстояние отсечки <input id="cutoffDistance" type="number" step="100" value="800"></label>
+      <button id="btnRunSim">Запустить симуляцию</button>
+      <div id="simStatus" class="status"></div>
+    </div>
+
+    <div class="block">
+      <h3>4) A/B тест новой точки</h3>
+      <div class="grid2">
+        <label>lat <input id="abLat" type="number" step="0.000001" value="54.945156709810796"></label>
+        <label>lon <input id="abLon" type="number" step="0.000001" value="41.381399144820726"></label>
+      </div>
+      <label>type
+        <input id="abType" type="text" value="cafe">
+      </label>
+      <label><input id="pickOnMap" type="checkbox"> выбрать точку кликом по карте</label>
+      <button id="btnAB">Запустить A/B тест</button>
+      <div id="abStatus" class="status"></div>
+    </div>
+
+    <div class="block">
+      <h3>Подсказка</h3>
+      <ul>
+        <li>Серые точки — сырые POI до симуляции</li>
+        <li>Цветные круги — результат симуляции (радиус ~ среднедневные визиты)</li>
+        <li>Клик по точке — всплывающее окно с типом и среднедневными визитами</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+
+
+<script src="/static/main.js"></script>
+</body>
+</html>

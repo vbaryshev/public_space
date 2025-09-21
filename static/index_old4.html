@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>POI Visits — Interactive Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>Управление</h2>
+
+    <div class="block">
+      <h3>1) Загрузка GPKG</h3>
+      <input type="file" id="gpkgInput" accept=".gpkg"/>
+      <button id="uploadBtn">Загрузить</button>
+      <button id="initBtn">Инициализировать</button>
+      <div id="initStatus" class="status"></div>
+    </div>
+
+    <div class="block">
+      <h3>2) Параметры модели</h3>
+      <label>alpha <input id="alpha" type="number" step="0.1" value="1.0"></label>
+      <label>beta <input id="beta" type="number" step="0.1" value="1.2"></label>
+      <label>gamma <input id="gamma" type="number" step="0.1" value="1.0"></label>
+      <label>d0 <input id="d0" type="number" step="1" value="50"></label>
+
+      <label>cutoff_distance (м) <input id="cutoff" type="number" step="100" value="7000"></label>
+      <label>base_rate_per_person_per_hour <input id="baseRate" type="number" step="0.005" value="0.02"></label>
+
+      <label>Период: start <input id="startDate" type="date" value="2025-01-01"></label>
+      <label>end <input id="endDate" type="date" value="2025-12-31"></label>
+      <label>freq <input id="freq" type="text" value="H"></label>
+
+      <label>poi_type_weights (JSON)
+        <textarea id="typeWeights" rows="2">{ "mall": 1.5, "park": 0.8, "cafe": 1.1 }</textarea>
+      </label>
+      <label>tod_multipliers (JSON)
+        <textarea id="tod" rows="2">{ "morning": 0.9, "afternoon": 1.1, "evening": 1.0 }</textarea>
+      </label>
+      <label>weather_multipliers (JSON)
+        <textarea id="weather" rows="2">{ "sunny": 1.2, "rainy": 0.3, "windy": 0.8, "snowy": 0.8 }</textarea>
+      </label>
+      <label>season_multipliers (JSON)
+        <textarea id="season" rows="2">{ "spring": 1.0, "summer": 1.5, "autumn": 0.7, "winter": 0.5 }</textarea>
+      </label>
+
+      <button id="runSimBtn">Запустить симуляцию</button>
+      <div id="simStatus" class="status"></div>
+      <div id="summaryByType"></div>
+    </div>
+
+    <div class="block">
+      <h3>3) A/B‑тест новой точки</h3>
+      <label>lat <input id="abLat" type="number" step="0.000001" value="54.945156709810796"></label>
+      <label>lon <input id="abLon" type="number" step="0.000001" value="41.381399144820726"></label>
+      <label>new_type <input id="abType" type="text" value="cafe"></label>
+      <button id="pickBtn">Выбрать на карте</button>
+      <button id="runAbBtn">Запустить A/B</button>
+      <div id="abStatus" class="status"></div>
+    </div>
+
+    <div class="block note">
+      Серые точки — исходные POI (до симуляции).
+      Цветные точки — результаты (радиус ~ среднедневные визиты). Клик — тип + среднедневные визиты.
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>

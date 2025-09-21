@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>POI Visits — Interactive Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
+  <link href="./style.css" rel="stylesheet"/>
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <h2>Симуляция посещений POI</h2>
+
+      <section>
+        <h3>1) Данные GPKG</h3>
+        <input type="file" id="gpkgFile" accept=".gpkg"/>
+        <div class="row">
+          <button id="btnUpload">Загрузить</button>
+          <button id="btnRefresh" class="secondary">Обновить список</button>
+        </div>
+
+        <label for="gpkgSelect">Выберите загруженный файл</label>
+        <select id="gpkgSelect"></select>
+
+        <div class="row">
+          <button id="btnLoadPoi" class="secondary" disabled>Показать POI</button>
+        </div>
+        <div class="hint">Загрузите один или несколько .gpkg. Выберите файл в списке перед симуляцией.</div>
+        <div id="uploadStatus" class="status"></div>
+      </section>
+
+      <section>
+        <h3>2) Параметры модели</h3>
+        <div class="grid">
+          <label>Start</label><input id="start" type="date" value="2025-01-01">
+          <label>End</label><input id="end" type="date" value="2025-12-31">
+          <label>Freq</label>
+          <select id="freq">
+            <option value="H" selected>H</option>
+            <option value="D">D</option>
+          </select>
+
+          <label>Base rate (/person/hour)</label><input id="baseRate" type="number" step="0.001" value="0.02">
+          <label>Cutoff distance (m)</label><input id="cutoff" type="number" step="10" value="7000">
+
+          <label>Alpha</label><input id="alpha" type="number" step="0.01" value="1.0">
+          <label>Beta</label><input id="beta" type="number" step="0.01" value="1.2">
+          <label>Gamma</label><input id="gamma" type="number" step="0.01" value="1.0">
+          <label>d0</label><input id="d0" type="number" step="1" value="50">
+
+          <label>Distance bins</label>
+          <input id="distBins" type="text" value="0,500,1500,3000,5000">
+        </div>
+
+        <label>POI type weights (JSON)</label>
+        <textarea id="poiWeights" rows="2">{ "mall": 1.5, "park": 0.8, "cafe": 1.1 }</textarea>
+
+        <label>Time-of-day multipliers (JSON)</label>
+        <textarea id="tod" rows="2">{ "morning": 0.9, "afternoon": 1.1, "evening": 1.0 }</textarea>
+
+        <label>Weather multipliers (JSON)</label>
+        <textarea id="weather" rows="2">{ "sunny": 1.2, "rainy": 0.3, "windy": 0.8, "snowy": 0.8 }</textarea>
+
+        <label>Season multipliers (JSON)</label>
+        <textarea id="season" rows="2">{ "spring": 1.0, "summer": 1.5, "autumn": 0.7, "winter": 0.5 }</textarea>
+
+        <button id="btnRun" disabled>Запустить симуляцию</button>
+        <div id="simStatus" class="status"></div>
+      </section>
+
+      <section>
+        <h3>Легенда</h3>
+        <div class="legend">
+          <div class="legend-row">
+            <span>Цвет: посетители/день</span>
+            <div id="legendGradient" class="gradient"></div>
+          </div>
+          <div class="legend-row">
+            <span id="legendMin">min: —</span>
+            <span id="legendMean">mean: —</span>
+            <span id="legendMax">max: —</span>
+          </div>
+          <div class="legend-row small">
+            Размер круга ~ посетители/день
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3>Распределение по типам POI</h3>
+        <canvas id="typeChart" height="220"></canvas>
+        <div id="chartStatus" class="status"></div>
+      </section>
+    </aside>
+
+    <main id="mapContainer">
+      <div id="map"></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
