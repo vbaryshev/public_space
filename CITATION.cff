@@ -1,17 +1,28 @@
 cff-version: 1.2.0
 message: "If you use this software or reference the methodology, please cite the underlying paper as below."
+title: "Predicting the attendance of urban public spaces based on Bayesian dynamic networks given streams of updated data"
 authors:
   - family-names: Baryshev
     given-names: "V. V."
-title: "Predicting the attendance of urban public spaces based on Bayesian dynamic networks given streams of updated data"
-type: conference-paper
-collection-title: "Nedvizhimost: ekonomika, upravlenie"
-year: 2025
-issue: "S3"
-start: 88
-end: 92
-identifiers:
-  - type: other
-    value: "EDN: RAQJNG"
-  - type: other
-    value: "eLIBRARY ID: 93494655"
+    affiliation: "Institute General Plan of Moscow, Moscow"
+preferred-citation:
+  type: article
+  title: "Predicting the attendance of urban public spaces based on Bayesian dynamic networks given streams of updated data"
+  authors:
+    - family-names: Baryshev
+      given-names: "V. V."
+      affiliation: "Institute General Plan of Moscow, Moscow"
+  journal: "Nedvizhimost: ekonomika, upravlenie"
+  year: 2025
+  volume: "S3"
+  start: 88
+  end: 92
+  issn: "2073-8412"
+  eissn: "3034-1485"
+  identifiers:
+    - type: other
+      value: "RAQJNG"
+      description: "EDN"
+    - type: other
+      value: "93494655"
+      description: "eLIBRARY ID"
